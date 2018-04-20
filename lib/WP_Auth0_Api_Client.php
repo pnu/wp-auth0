@@ -147,25 +147,37 @@ class WP_Auth0_Api_Client {
 		return true;
 	}
 
+	/**
+	 * Get required telemetry header
+	 *
+	 * @return array
+	 */
 	public static function get_info_headers() {
-		global $wp_version;
-
-		$a0_options = WP_Auth0_Options::Instance();
-
-		if ( $a0_options->get( 'metrics' ) != 1 ) {
-			return array();
+		$server_software = filter_input( INPUT_SERVER, 'SERVER_SOFTWARE', FILTER_SANITIZE_STRING );
+		if ( $server_software ) {
+			$server_software = explode( ' ', $server_software );
+			$server_software = $server_software[0];
+		} else {
+			$server_software = __( 'unknown', 'wp-auth0' );
 		}
 
-		return array(
-			'Auth0-Client' => base64_encode( wp_json_encode( array(
-						'name' => 'wp-auth0',
-						'version' => WPA0_VERSION,
-						'environment' => array(
-							'PHP' => phpversion(),
-							'WordPress' => $wp_version,
-						)
-					) ) )
+		try {
+			$mysql_ver = mysqli_get_client_version( null );
+		} catch ( Exception $e ) {
+			$mysql_ver = __( 'unknown', 'wp-auth0' );
+		}
+
+		$header_value = array(
+			'name' => 'wp-auth0',
+			'version' => WPA0_VERSION,
+			'environment' => array(
+				'PHP' => phpversion(),
+				'WordPress' => get_bloginfo('version'),
+				'Server' => $server_software,
+				'MySQL' => $mysql_ver
+			)
 		);
+		return array( 'Auth0-Client' => base64_encode( wp_json_encode( $header_value ) ) );
 	}
 
 	/**
