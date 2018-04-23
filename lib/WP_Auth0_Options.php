@@ -19,8 +19,13 @@ class WP_Auth0_Options extends WP_Auth0_Options_Generic {
 		return get_site_option( 'users_can_register', 0 ) == 1;
 	}
 
-	// TODO: Deprecate, not used
+	/**
+	 * @deprecated 3.6.0 - Not used
+	 * @return array
+	 */
 	public function get_enabled_connections() {
+		// phpcs:ignore
+		trigger_error( sprintf( __( 'Method %s is deprecated.', 'wp-auth0' ), __METHOD__ ), E_USER_DEPRECATED );
 		return array( 'facebook', 'twitter', 'google-oauth2' );
 	}
 
